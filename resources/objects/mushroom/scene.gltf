@@ -1,0 +1,289 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 8027,
+      "max": [
+        1.9684224128723145,
+        2.3090577125549316,
+        1.18373703956604
+      ],
+      "min": [
+        -1.8797008991241455,
+        -1.1614114046096802,
+        -1.7227847576141357
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 96324,
+      "componentType": 5126,
+      "count": 8027,
+      "max": [
+        0.9998635053634644,
+        0.9999778270721436,
+        0.999595046043396
+      ],
+      "min": [
+        -0.9999216794967651,
+        -0.9998232126235962,
+        -0.9995580315589905
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 8027,
+      "max": [
+        0.9999905824661255,
+        0.9999989867210388,
+        0.9997336268424988,
+        1.0
+      ],
+      "min": [
+        -0.9999581575393677,
+        -0.9999250173568726,
+        -0.9999567866325378,
+        1.0
+      ],
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 8027,
+      "max": [
+        0.9990234375,
+        0.9929814338684082
+      ],
+      "min": [
+        0.0009765648283064365,
+        0.0009765469003468752
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 44640,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "Hialda Alpizar (https://sketchfab.com/dahlia3d)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/mushrooms-blue-oyster-0de8bc6c368f4870a8ece254783feeec",
+      "title": "Mushrooms - Blue Oyster"
+    },
+    "generator": "Sketchfab-13.61.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 178560,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 64216,
+      "byteOffset": 178560,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 192648,
+      "byteOffset": 242776,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 128432,
+      "byteOffset": 435424,
+      "byteStride": 16,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 563856,
+      "uri": "scene.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/Merged_BlueOyster07_withUV3_1_baseColor.jpeg"
+    },
+    {
+      "uri": "textures/Merged_BlueOyster07_withUV3_1_metallicRoughness.png"
+    },
+    {
+      "uri": "textures/Merged_BlueOyster07_withUV3_1_normal.png"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "Merged_BlueOyster07_withUV3_1",
+      "normalTexture": {
+        "index": 2
+      },
+      "occlusionTexture": {
+        "index": 1,
+        "strength": 0.6985462939019447
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Merged_BlueOyster07_withUV3_1_Merged_BlueOyster07_withUV3_1_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3
+          },
+          "indices": 4,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        8.384263038635254,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.2899257835392194,
+        -8.379248637239357,
+        0.0,
+        0.0,
+        8.379248637239357,
+        -0.2899257835392194,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        0.009999999776482582,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.009999999776482582,
+        0.0,
+        0.0,
+        -0.009999999776482582,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "016bf6b1cffc4df181f6951d4ca62943.fbx"
+    },
+    {
+      "children": [
+        3
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        4
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.9999999999999867,
+        1.6292067073209113e-07,
+        0.0,
+        0.0,
+        -1.6292067073209113e-07,
+        0.9999999999999867,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Merged_BlueOyster07_withUV3_1"
+    },
+    {
+      "mesh": 0,
+      "name": "Merged_BlueOyster07_withUV3_1_Merged_BlueOyster07_withUV3_1_0"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ]
+}
