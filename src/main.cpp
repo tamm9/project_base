@@ -58,15 +58,23 @@ struct PointLight {
     float quadratic;
 };
 
+struct DirLight {
+    glm::vec3 direction;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+};
+
+
+
 struct ProgramState {
     glm::vec3 clearColor = glm::vec3(0);
     bool ImGuiEnabled = false;
     Camera camera;
     bool CameraMouseMovementUpdateEnabled = true;
+
     PointLight pointLight;
-
-
-    glm::vec3 sunPosition = glm::vec3 (0.0f, 70.0f, 0.0f);
+    DirLight dirLight;
 
 
     ProgramState()
@@ -176,9 +184,11 @@ int main() {
 
     // load models
     // -----------
+    // Ground model
     Model floorModel("resources/objects/floor/floor.obj");
     floorModel.SetShaderTextureNamePrefix("material.");
 
+    // Sun model
     Model sunModel("resources/objects/sun/sun.obj");
     sunModel.SetShaderTextureNamePrefix("material.");
 
@@ -256,9 +266,14 @@ int main() {
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
+    DirLight& dirLight = programState->dirLight;
+    dirLight.direction = glm::vec3(-1.0f, -25.0f, -35.3f);
+    dirLight.ambient =   glm::vec3(0.03f, 0.03f, 0.05f);
+    dirLight.diffuse =   glm::vec3( 0.05f, 0.08f, 0.05f);
+    dirLight.specular =  glm::vec3(0.2f, 0.2f, 0.2f);
 
     PointLight& pointLight = programState->pointLight;
-    pointLight.position = glm::vec3(0.0f, 70.0, 0.0);
+    pointLight.position = glm::vec3(0.0f, 130.0, 0.0);
     pointLight.ambient = glm::vec3(16.0f,16.0f,15.0f);
     pointLight.diffuse = glm::vec3(80.0, 40.0, 10.0);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
@@ -266,7 +281,6 @@ int main() {
     pointLight.constant = 1.0f;
     pointLight.linear = 0.3f;
     pointLight.quadratic = 0.003f;
-
 
 
     // draw in wireframe
@@ -293,6 +307,7 @@ int main() {
 
         ourShader.use();
 
+        // Point light
         ourShader.setVec3("pointLight.position", pointLight.position);
         ourShader.setVec3("pointLight.ambient", pointLight.ambient);
         ourShader.setVec3("pointLight.diffuse", pointLight.diffuse);
@@ -302,6 +317,12 @@ int main() {
         ourShader.setFloat("pointLight.quadratic", pointLight.quadratic);
         ourShader.setVec3("viewPosition", programState->camera.Position);
         ourShader.setFloat("material.shininess", 32.0f);
+
+        // Directional light
+        ourShader.setVec3("dirLight.direction", dirLight.direction);
+        ourShader.setVec3("dirLight.ambient", dirLight.ambient);
+        ourShader.setVec3("dirLight.diffuse", dirLight.diffuse);
+        ourShader.setVec3("dirLight.specular", dirLight.specular);
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom),
@@ -313,12 +334,12 @@ int main() {
         // render the loaded models
 
         // floor
-        glm::mat4 floorM = modelMatrix(glm::vec3(0.0f), glm::vec3(0.5f), glm::vec3(1.0f,0.0f,0.0f), -90.0f);
+        glm::mat4 floorM = modelMatrix(glm::vec3(0.0f), glm::vec3(2.0f), glm::vec3(1.0f,0.0f,0.0f), -90.0f);
         ourShader.setMat4("model", floorM);
         floorModel.Draw(ourShader);
 
         //sun
-        glm::mat4 sunM = modelMatrix(glm::vec3(0.0f,70.0f,0.0f), glm::vec3(0.009f), glm::vec3(0.0f,0.0f,1.0f), 0.0f);
+        glm::mat4 sunM = modelMatrix(glm::vec3(0.0f,130.0f,0.0f), glm::vec3(0.009f), glm::vec3(0.0f,0.0f,1.0f), 0.0f);
         ourShader.setMat4("model", sunM);
         sunModel.Draw(ourShader);
 
