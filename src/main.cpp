@@ -155,7 +155,7 @@ int main() {
     }
 
     // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
-    stbi_set_flip_vertically_on_load(true);
+    //stbi_set_flip_vertically_on_load(true);
 
     programState = new ProgramState;
     programState->LoadFromFile("resources/program_state.txt");
@@ -176,11 +176,15 @@ int main() {
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
+    // Face culling
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     // build and compile shaders
     // -------------------------
     Shader ourShader("resources/shaders/modelshader.vs", "resources/shaders/modelshader.fs");
     Shader skyboxShader("resources/shaders/skybox.vs", "resources/shaders/skybox.fs");
+    Shader blendingShader("resources/shaders/blending.vs", "resources/shaders/blending.fs");
 
     // load models
     // -----------
@@ -237,6 +241,26 @@ int main() {
             1.0f, -1.0f,  1.0f
     };
 
+    // Grass vertices
+    float transparentVertices[] = {
+            // positions         // texture Coords (swapped y coordinates because texture is flipped upside down)
+            0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+            0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
+            1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+
+            0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+            1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+            1.0f,  0.5f,  0.0f,  1.0f,  0.0f
+    };
+
+    //Grass positions
+    vector<glm::vec3> grassPositions;
+    vector<float> grassRottation;
+    for(int i =0;i<3000;i++){
+        grassPositions.push_back(glm::vec3(rand()%55 - 25.0f,rand()%5*0.1f,rand()%50-25.0f));
+        grassRottation.push_back(rand()%180);
+    }
+
     // skybox VAO
     unsigned int skyboxVAO, skyboxVBO;
     glGenVertexArrays(1, &skyboxVAO);
@@ -247,8 +271,26 @@ int main() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+    // transparent VAO
+    unsigned int transparentVAO, transparentVBO;
+    glGenVertexArrays(1, &transparentVAO);
+    glGenBuffers(1, &transparentVBO);
+    glBindVertexArray(transparentVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, transparentVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(transparentVertices), transparentVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
     // load textures
     // -------------
+    // Grass texture
+    unsigned int grassTexture = loadTexture(FileSystem::getPath("resources/textures/grass.png").c_str());
+
+    // obrtanje teksture
+    stbi_set_flip_vertically_on_load(true);
 
     vector<std::string> faces
         {
@@ -334,14 +376,34 @@ int main() {
         // render the loaded models
 
         // floor
-        glm::mat4 floorM = modelMatrix(glm::vec3(0.0f), glm::vec3(2.0f), glm::vec3(1.0f,0.0f,0.0f), -90.0f);
+        glm::mat4 floorM = modelMatrix(glm::vec3(0.0f,-19.0f,-50.0f), glm::vec3(2.0f), glm::vec3(1.0f,0.0f,0.0f), -90.0f);
         ourShader.setMat4("model", floorM);
         floorModel.Draw(ourShader);
 
         //sun
-        glm::mat4 sunM = modelMatrix(glm::vec3(0.0f,130.0f,0.0f), glm::vec3(0.009f), glm::vec3(0.0f,0.0f,1.0f), 0.0f);
+        glm::mat4 sunM = modelMatrix(glm::vec3(0.0f,150.0f,0.0f), glm::vec3(0.02f), glm::vec3(0.0f,0.0f,1.0f), 0.0f);
         ourShader.setMat4("model", sunM);
         sunModel.Draw(ourShader);
+
+        glDisable(GL_CULL_FACE);
+        // vegetation
+        blendingShader.use();
+        glm::mat4 grassM = glm::mat4(1.0f);
+        blendingShader.setMat4("projection", projection);
+        blendingShader.setMat4("view", view);
+        glBindVertexArray(transparentVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, grassTexture);
+        for (unsigned int i = 0; i < 3000; i++)
+        {
+            grassM = glm::mat4(1.0f);
+            grassM = glm::scale(grassM, glm::vec3(10.0f));
+            grassM = glm::translate(grassM, grassPositions[i]);
+            grassM = glm::rotate(grassM ,glm::radians(grassRottation[i]), glm::vec3(0.0f ,1.0f, 0.0f));
+            blendingShader.setMat4("model", grassM);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        }
+        glEnable(GL_CULL_FACE);
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
@@ -377,7 +439,7 @@ int main() {
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glDeleteVertexArrays(1, &skyboxVAO);
-    glDeleteBuffers(1, &skyboxVAO);
+    glDeleteBuffers(1, &skyboxVBO);
 
     glfwTerminate();
     return 0;
