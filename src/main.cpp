@@ -31,11 +31,9 @@ unsigned int loadTexture(char const * path);
 
 unsigned int loadCubemap(vector<std::string> faces);
 
-glm::mat4 modelMatrix(glm::vec3 translate, glm::vec3 scale, glm::vec3 axisOfRotation , float rotationAngle);
-
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 900;
 
 // camera
 
@@ -68,6 +66,7 @@ struct DirLight {
 
 
 struct ProgramState {
+    int nrTrees = 20;
     glm::vec3 clearColor = glm::vec3(0);
     bool ImGuiEnabled = false;
     Camera camera;
@@ -196,6 +195,15 @@ int main() {
     Model sunModel("resources/objects/sun/sun.obj");
     sunModel.SetShaderTextureNamePrefix("material.");
 
+    // Tree model
+    Model treeModel("resources/objects/tree/drvo.obj");
+    treeModel.SetShaderTextureNamePrefix("material.");
+
+    // Cabin model
+    Model cabinModel("resources/objects/cabin/farmhouse_obj.obj");
+    cabinModel.SetShaderTextureNamePrefix("material.");
+
+
     float skyboxVertices[] = {
             // positions
             -1.0f,  1.0f, -1.0f,
@@ -253,12 +261,19 @@ int main() {
             1.0f,  0.5f,  0.0f,  1.0f,  0.0f
     };
 
-    //Grass positions
+    // transparent vegetation location
     vector<glm::vec3> grassPositions;
     vector<float> grassRottation;
+    vector<glm::vec3> treePositions;
+
+    //Grass positions
     for(int i =0;i<3000;i++){
         grassPositions.push_back(glm::vec3(rand()%55 - 25.0f,rand()%5*0.1f,rand()%50-25.0f));
         grassRottation.push_back(rand()%180);
+    }
+    // Tree positions
+    for(int i =0;i<200;i++){
+        treePositions.push_back(glm::vec3(rand()%45 - 25.0f,-0.3f,rand()%40-25.0f));
     }
 
     // skybox VAO
@@ -328,6 +343,9 @@ int main() {
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    blendingShader.use();
+    blendingShader.setInt("texture1", 0);
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window)) {
@@ -376,14 +394,38 @@ int main() {
         // render the loaded models
 
         // floor
-        glm::mat4 floorM = modelMatrix(glm::vec3(0.0f,-19.0f,-50.0f), glm::vec3(2.0f), glm::vec3(1.0f,0.0f,0.0f), -90.0f);
+        glm::mat4 floorM = glm::mat4(1.0f);
+        floorM = glm::translate(floorM,glm::vec3(0.0f,-19.0f,-50.0f));
+        floorM = glm::rotate(floorM, glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.0f));
+        floorM = glm::scale(floorM, glm::vec3(2.0f));
         ourShader.setMat4("model", floorM);
         floorModel.Draw(ourShader);
 
         //sun
-        glm::mat4 sunM = modelMatrix(glm::vec3(0.0f,150.0f,0.0f), glm::vec3(0.02f), glm::vec3(0.0f,0.0f,1.0f), 0.0f);
+        glm::mat4 sunM = glm::mat4(1.0f);
+        sunM = glm::translate(sunM,glm::vec3(0.0f,150.0f,0.0f));
+        sunM = glm::scale(sunM, glm::vec3(0.02f));
         ourShader.setMat4("model", sunM);
         sunModel.Draw(ourShader);
+
+        //cabin
+        glm::mat4 cabinM = glm::mat4(1.0f);
+        cabinM = glm::translate(cabinM,glm::vec3(-35.0f,-4.3f,-120.0f));
+        cabinM = glm::rotate(cabinM, glm::radians(180.0f), glm::vec3(0.0f ,1.0f, 0.0f));
+        cabinM = glm::scale(cabinM,  glm::vec3(3.5f));
+        ourShader.setMat4("model", cabinM);
+        cabinModel.Draw(ourShader);
+
+        //trees
+        glm::mat4 treeM = glm::mat4(1.0f);
+        for(unsigned int i=0; i<programState->nrTrees; i++) {
+            treeM = glm::mat4(1.0f);
+            treeM = glm::scale(treeM, glm::vec3(20.0f));
+            treeM = glm::translate(treeM, treePositions[i]);
+            treeM = glm::rotate(treeM, glm::radians(grassRottation[i]), glm::vec3(0.0f, 1.0f, 0.0f));
+            ourShader.setMat4("model", treeM);
+            treeModel.Draw(ourShader);
+        }
 
         glDisable(GL_CULL_FACE);
         // vegetation
@@ -440,6 +482,8 @@ int main() {
     // ------------------------------------------------------------------
     glDeleteVertexArrays(1, &skyboxVAO);
     glDeleteBuffers(1, &skyboxVBO);
+    glDeleteBuffers(1,&transparentVBO);
+    glDeleteVertexArrays(1,&transparentVAO);
 
     glfwTerminate();
     return 0;
@@ -532,17 +576,6 @@ unsigned int loadTexture(char const * path)
     return textureID;
 }
 
-//function for creating a model matrix
-glm::mat4 modelMatrix(glm::vec3 translate, glm::vec3 scale, glm::vec3 axisOfRotation, float rotationAngle){
-
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model,
-                               translate);
-    model = glm::rotate(model, glm::radians(rotationAngle), axisOfRotation);
-    model = glm::scale(model, scale);
-
-    return model;
-}
 
 unsigned int loadCubemap(vector<std::string> faces)
 {
@@ -588,8 +621,9 @@ void DrawImGui(ProgramState *programState) {
         ImGui::Text("Hello text");
         ImGui::SliderFloat("Float slider", &f, 0.0, 1.0);
         ImGui::ColorEdit3("Background color", (float *) &programState->clearColor);
-        //ImGui::DragFloat3("Backpack position", (float*)&programState->treePosition);
-        //ImGui::DragFloat("Backpack scale", &programState->treeScale, 0.05, 0.1, 4.0);
+
+        ImGui::Text("trees count");
+        ImGui::DragInt("number of trees", &programState->nrTrees, 1, 20, 200);
 
         ImGui::DragFloat("pointLight.constant", &programState->pointLight.constant, 0.05, 0.0, 1.0);
         ImGui::DragFloat("pointLight.linear", &programState->pointLight.linear, 0.05, 0.0, 1.0);
