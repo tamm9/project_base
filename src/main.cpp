@@ -66,7 +66,7 @@ struct DirLight {
 
 
 struct ProgramState {
-    int nrTrees = 20;
+    int nrTrees = 50;
     glm::vec3 clearColor = glm::vec3(0);
     bool ImGuiEnabled = false;
     Camera camera;
@@ -203,6 +203,13 @@ int main() {
     Model cabinModel("resources/objects/cabin/farmhouse_obj.obj");
     cabinModel.SetShaderTextureNamePrefix("material.");
 
+    // Egg model
+    Model eggModel("resources/objects/easteregg/easter_egg.obj");
+    eggModel.SetShaderTextureNamePrefix("material.");
+
+    // Table model
+    Model tableModel("resources/objects/stocic/easter_ro.obj");
+    tableModel.SetShaderTextureNamePrefix("material.");
 
     float skyboxVertices[] = {
             // positions
@@ -308,14 +315,14 @@ int main() {
     stbi_set_flip_vertically_on_load(true);
 
     vector<std::string> faces
-        {
+            {
                     FileSystem::getPath("resources/textures/skybox/right.jpg"),
                     FileSystem::getPath("resources/textures/skybox/left.jpg"),
                     FileSystem::getPath("resources/textures/skybox/top.jpg"),
                     FileSystem::getPath("resources/textures/skybox/bottom.jpg"),
                     FileSystem::getPath("resources/textures/skybox/front.jpg"),
                     FileSystem::getPath("resources/textures/skybox/back.jpg")
-        };
+            };
     unsigned int cubemapTexture = loadCubemap(faces);
 
     // shader configuration
@@ -325,14 +332,14 @@ int main() {
 
     DirLight& dirLight = programState->dirLight;
     dirLight.direction = glm::vec3(-1.0f, -25.0f, -35.3f);
-    dirLight.ambient =   glm::vec3(0.03f, 0.03f, 0.05f);
-    dirLight.diffuse =   glm::vec3( 0.05f, 0.08f, 0.05f);
-    dirLight.specular =  glm::vec3(0.2f, 0.2f, 0.2f);
+    dirLight.ambient =   glm::vec3(0.4f);
+    dirLight.diffuse =   glm::vec3( 0.2f);
+    dirLight.specular =  glm::vec3(0.2f);
 
     PointLight& pointLight = programState->pointLight;
     pointLight.position = glm::vec3(0.0f, 130.0, 0.0);
-    pointLight.ambient = glm::vec3(16.0f,16.0f,15.0f);
-    pointLight.diffuse = glm::vec3(80.0, 40.0, 10.0);
+    pointLight.ambient = glm::vec3(1.0f,1.0f,1.0f);
+    pointLight.diffuse = glm::vec3(8.0, 4.0, 1.0);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
 
     pointLight.constant = 1.0f;
@@ -368,7 +375,7 @@ int main() {
         ourShader.use();
 
         // Point light
-        ourShader.setVec3("pointLight.position", pointLight.position);
+        ourShader.setVec3("pointLight.position", glm::vec3(-30.0f, 16.0f + 2.0f * sin(currentFrame), -8.0f));
         ourShader.setVec3("pointLight.ambient", pointLight.ambient);
         ourShader.setVec3("pointLight.diffuse", pointLight.diffuse);
         ourShader.setVec3("pointLight.specular", pointLight.specular);
@@ -395,7 +402,7 @@ int main() {
 
         // floor
         glm::mat4 floorM = glm::mat4(1.0f);
-        floorM = glm::translate(floorM,glm::vec3(0.0f,-19.0f,-50.0f));
+        floorM = glm::translate(floorM,glm::vec3(0.0f,-20.0f,0.0f));
         floorM = glm::rotate(floorM, glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.0f));
         floorM = glm::scale(floorM, glm::vec3(2.0f));
         ourShader.setMat4("model", floorM);
@@ -403,8 +410,9 @@ int main() {
 
         //sun
         glm::mat4 sunM = glm::mat4(1.0f);
-        sunM = glm::translate(sunM,glm::vec3(0.0f,150.0f,0.0f));
-        sunM = glm::scale(sunM, glm::vec3(0.02f));
+        sunM = glm::translate(sunM,glm::vec3(-30.0f, 14.0f+2.0f*sin(currentFrame),-8.0f));
+        sunM = glm::rotate(sunM,glm::radians(currentFrame*10.0f), glm::vec3(0.0f ,1.0f, 0.0f));
+        sunM = glm::scale(sunM, glm::vec3(0.01f));
         ourShader.setMat4("model", sunM);
         sunModel.Draw(ourShader);
 
@@ -415,6 +423,22 @@ int main() {
         cabinM = glm::scale(cabinM,  glm::vec3(3.5f));
         ourShader.setMat4("model", cabinM);
         cabinModel.Draw(ourShader);
+
+        //egg
+        glm::mat4 eggM = glm::mat4(1.0f);
+        eggM = glm::translate(eggM ,glm::vec3(-30.0f,14.0f,-8.0f));
+        eggM = glm::rotate(eggM ,glm::radians(currentFrame*5.0f), glm::vec3(0.0f ,1.0f, 0.0f));
+        eggM = glm::scale(eggM , glm::vec3(3.0f));
+        ourShader.setMat4("model", eggM);
+        eggModel.Draw(ourShader);
+
+        //table
+        glm::mat4 tableM = glm::mat4(1.0f);
+        tableM = glm::translate(tableM ,glm::vec3(-34.0f,3.6f+2.0f*sin(currentFrame),-65.0f));
+        tableM = glm::scale(tableM , glm::vec3(1.8f));
+        ourShader.setMat4("model", tableM);
+        tableModel.Draw(ourShader);
+
 
         //trees
         glm::mat4 treeM = glm::mat4(1.0f);
@@ -482,8 +506,8 @@ int main() {
     // ------------------------------------------------------------------
     glDeleteVertexArrays(1, &skyboxVAO);
     glDeleteBuffers(1, &skyboxVBO);
-    glDeleteBuffers(1,&transparentVBO);
-    glDeleteVertexArrays(1,&transparentVAO);
+    glDeleteBuffers(2,&transparentVBO);
+    glDeleteVertexArrays(2,&transparentVAO);
 
     glfwTerminate();
     return 0;
@@ -618,12 +642,9 @@ void DrawImGui(ProgramState *programState) {
     {
         static float f = 0.0f;
         ImGui::Begin("Hello window");
-        ImGui::Text("Hello text");
-        ImGui::SliderFloat("Float slider", &f, 0.0, 1.0);
-        ImGui::ColorEdit3("Background color", (float *) &programState->clearColor);
 
-        ImGui::Text("trees count");
-        ImGui::DragInt("number of trees", &programState->nrTrees, 1, 20, 200);
+        ImGui::Text("Trees count");
+        ImGui::DragInt("number of trees", &programState->nrTrees, 1, 50,200);
 
         ImGui::DragFloat("pointLight.constant", &programState->pointLight.constant, 0.05, 0.0, 1.0);
         ImGui::DragFloat("pointLight.linear", &programState->pointLight.linear, 0.05, 0.0, 1.0);

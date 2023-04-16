@@ -1,0 +1,23 @@
+# Blender 3.5.0 MTL File: 'easter_ro.blend'
+# www.blender.org
+
+newmtl Material.001
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+Pm 0.000000
+map_Kd easteregg_basecolor.png
+map_Pr easteregg_roughness.png
+
+newmtl Material.001_NONE
+Kd 0.800000 0.800000 0.800000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+Pr 1.000000
+Pm 0.000000
+
