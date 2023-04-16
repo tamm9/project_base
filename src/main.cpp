@@ -34,6 +34,7 @@ unsigned int loadCubemap(vector<std::string> faces);
 // settings
 const unsigned int SCR_WIDTH = 1600;
 const unsigned int SCR_HEIGHT = 900;
+bool activated = false;
 
 // camera
 
@@ -211,6 +212,10 @@ int main() {
     Model tableModel("resources/objects/stocic/easter_ro.obj");
     tableModel.SetShaderTextureNamePrefix("material.");
 
+    // Eggs model
+    Model eggsModel("resources/objects/eggs/eggs.obj");
+    tableModel.SetShaderTextureNamePrefix("material.");
+
     float skyboxVertices[] = {
             // positions
             -1.0f,  1.0f, -1.0f,
@@ -282,6 +287,15 @@ int main() {
     for(int i =0;i<200;i++){
         treePositions.push_back(glm::vec3(rand()%45 - 25.0f,-0.3f,rand()%40-25.0f));
     }
+    // Eggs positions
+    glm::vec3 eggsPositions[] = {
+            glm::vec3( 120.0f,  -1.2f,  93.0f),
+            glm::vec3( -85.0f, -1.2f, -82.0f),
+            glm::vec3(-12.0f,  -1.2f, 55.0f),
+            glm::vec3( -65.0f,  -1.2f, 22.0f),
+            glm::vec3( 75.0f,  -1.2f, 20.0f),
+            glm::vec3( 25.0f,  -1.2f, -20.0f)
+    };
 
     // skybox VAO
     unsigned int skyboxVAO, skyboxVBO;
@@ -361,6 +375,7 @@ int main() {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        float radius = 110.0f;
 
         // input
         // -----
@@ -374,8 +389,17 @@ int main() {
 
         ourShader.use();
 
+        //testiramo da li je aktiviran efekat
+        if(!activated && programState->camera.Position.x >= 116.0f && programState->camera.Position.x <= 124.0f && programState->camera.Position.y >= -5.2f && programState->camera.Position.y <= 3.2f && programState->camera.Position.z >= 89.0f && programState->camera.Position.z <= 97.0f){
+            activated=true;
+        }
+
         // Point light
-        ourShader.setVec3("pointLight.position", glm::vec3(-30.0f, 16.0f + 2.0f * sin(currentFrame), -8.0f));
+        if(!activated) {
+            ourShader.setVec3("pointLight.position", glm::vec3(-30.0f, 16.0f + 2.0f * sin(currentFrame), -8.0f));
+        }else{
+            ourShader.setVec3("pointLight.position", glm::vec3(-35.0f + (float)sin(currentFrame)*radius,16.0f,-120.0f + (float)cos(currentFrame)*radius));
+        }
         ourShader.setVec3("pointLight.ambient", pointLight.ambient);
         ourShader.setVec3("pointLight.diffuse", pointLight.diffuse);
         ourShader.setVec3("pointLight.specular", pointLight.specular);
@@ -398,6 +422,7 @@ int main() {
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
 
+
         // render the loaded models
 
         // floor
@@ -410,8 +435,12 @@ int main() {
 
         //sun
         glm::mat4 sunM = glm::mat4(1.0f);
-        sunM = glm::translate(sunM,glm::vec3(-30.0f, 14.0f+2.0f*sin(currentFrame),-8.0f));
-        sunM = glm::rotate(sunM,glm::radians(currentFrame*10.0f), glm::vec3(0.0f ,1.0f, 0.0f));
+        if(activated){
+            sunM = glm::translate(sunM, glm::vec3(-35.0f + (float)sin(currentFrame)*radius,16.0f,-120.0f + (float)cos(currentFrame)*radius));
+        }else {
+            sunM = glm::translate(sunM, glm::vec3(-30.0f, 14.0f + 2.0f * sin(currentFrame), -8.0f));
+        }
+        sunM = glm::rotate(sunM, glm::radians(currentFrame * 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         sunM = glm::scale(sunM, glm::vec3(0.01f));
         ourShader.setMat4("model", sunM);
         sunModel.Draw(ourShader);
@@ -426,8 +455,13 @@ int main() {
 
         //egg
         glm::mat4 eggM = glm::mat4(1.0f);
-        eggM = glm::translate(eggM ,glm::vec3(-30.0f,14.0f,-8.0f));
-        eggM = glm::rotate(eggM ,glm::radians(currentFrame*5.0f), glm::vec3(0.0f ,1.0f, 0.0f));
+        if(activated){
+            eggM = glm::translate(eggM, glm::vec3(-35.0f + (float)sin(currentFrame)*radius,16.0f,-120.0f + (float)cos(currentFrame)*radius));
+        }else {
+            eggM = glm::translate(eggM, glm::vec3(-30.0f, 14.0f, -8.0f));
+        }
+
+        eggM = glm::rotate(eggM, glm::radians(currentFrame * 5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         eggM = glm::scale(eggM , glm::vec3(3.0f));
         ourShader.setMat4("model", eggM);
         eggModel.Draw(ourShader);
@@ -437,8 +471,9 @@ int main() {
         tableM = glm::translate(tableM ,glm::vec3(-34.0f,3.6f+2.0f*sin(currentFrame),-65.0f));
         tableM = glm::scale(tableM , glm::vec3(1.8f));
         ourShader.setMat4("model", tableM);
-        tableModel.Draw(ourShader);
-
+        if(activated) {
+            tableModel.Draw(ourShader);
+        }
 
         //trees
         glm::mat4 treeM = glm::mat4(1.0f);
@@ -449,6 +484,17 @@ int main() {
             treeM = glm::rotate(treeM, glm::radians(grassRottation[i]), glm::vec3(0.0f, 1.0f, 0.0f));
             ourShader.setMat4("model", treeM);
             treeModel.Draw(ourShader);
+        }
+
+        //eggs
+        glm::mat4 eggsM = glm::mat4(1.0f);
+        for(unsigned int i=0; i<6; i++) {
+            eggsM = glm::mat4(1.0f);
+            eggsM = glm::translate(eggsM, eggsPositions[i]);
+            eggsM = glm::rotate(eggsM, glm::radians(currentFrame*10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            eggsM = glm::scale(eggsM, glm::vec3(2.0f));
+            ourShader.setMat4("model", eggsM);
+            eggsModel.Draw(ourShader);
         }
 
         glDisable(GL_CULL_FACE);
@@ -675,5 +721,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         } else {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
+    }
+    if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+        activated=false;
     }
 }
