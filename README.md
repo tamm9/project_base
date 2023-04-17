@@ -10,6 +10,8 @@ Projekat iz racunarske grafike u Uskrsnjem stilu. Koriscen je skelet sa `https:/
 6. Sejderi idu u folder shaders. `Vertex shader` ima ekstenziju `.vs`, `fragment shader` ima ekstenziju `.fs`
 7. ALT+SHIFT+F10 -> project_base -> run
 8. Resurse i slike preuzeti sa [google drajva](https://drive.google.com/drive/folders/1uiFKMu9BPF4Jyi_ZzGQtodr4BcYUSwqW?usp=share_link)
+9. Treba pronaci grupu jaja koja pokrecu efekat
+10. Snimak projekta https://www.youtube.com/watch?v=a01fgRAIRKw
 
 # Komande
 
